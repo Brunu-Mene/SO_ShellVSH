@@ -1,6 +1,6 @@
-#include <stdio.h>
+#include "../include/Menu.h"
 
-int main(int argv, char **args){
-
+int main(int argc, char **argv){
+    startShell();
     return 0;
 }
