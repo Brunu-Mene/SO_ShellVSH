@@ -1,3 +1,8 @@
+#Grupo:
+#Bruno Menegaz Acerbi
+#Gustavo Dutra Santolin
+#Leonardo Franco Emerick Albergaria 
+
 TARGET := a.out
 LIBS := -lm
 OBJDIR := obj/

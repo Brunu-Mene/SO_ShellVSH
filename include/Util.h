@@ -8,5 +8,8 @@
 
 char *getEntrada();
 char* trim(char* str);
+char **criaVetString(int tam);
+int splitString(char *string, char **vetString, char *cSplit);
+void liberaVetorString(char **vetString, int tam);
 
 #endif
