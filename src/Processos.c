@@ -16,8 +16,9 @@ void criaProcessoForeground(char* comando){
             exit(1);
         }
         exit(1);
+    }else{
+        waitpid(pid1, NULL, 0);
     }
-    waitpid(pid1, NULL, 0);
     liberaVetorString(arrString, tamArr);
 }
 
@@ -31,8 +32,8 @@ void criaProcessoBackground(char** listaComandos, int vetTam){
         int fd[vetTam-1][2];
 
         for(int i = 0; i < vetTam - 1; i++){
-            if(pipe(fd[i]) == -1)
-                return 1;
+            // if(pipe(fd[i]) == -1)
+            //     return 1;
         }
 
         for(int i = 0; i < vetTam ; i++){
@@ -54,10 +55,12 @@ void criaProcessoBackground(char** listaComandos, int vetTam){
             }
             liberaVetorString(arrString, tamArr);
         }
-
+        sleep(1);
         exit(1);
     }
-    waitpid(pid1, NULL, 0);
+    else{
+        waitpid(pid1, NULL, 0);
+    }
 }
 
 int processoInterno(char* comando){
@@ -70,5 +73,11 @@ int processoInterno(char* comando){
         return 0;
     }
 
+    
+
+
     return 1;
 }
+
+
+
