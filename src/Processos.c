@@ -75,21 +75,20 @@ void criaProcessoBackground(char** listaComandos, int vetTam, Lista *listaProces
             liberaVetorString(arrString, tamArr);
 
         }
-        while(wait(NULL) > 0){
-            /*
-            //tratar os sinais aquis 
-            Verifica sinal de filho terminado
-            if() se for user 1 ou 2{
-                matar toda a sessao;
+        int status;
+        while(wait(&status) > 0){
+            if(WIFSIGNALED(status)){
+                if(WTERMSIG(status) == SIGUSR1 || WTERMSIG(status) == SIGUSR2){
+                    killpg(getgid(), WTERMSIG(status));
+                }
             }
-            */
         }
         exit(2);
     }
-    
+
     else{
         insereLista(listaProcessos, pid1);
-        sleep(1);
+        usleep(200000);
     }
 }
 
@@ -104,11 +103,9 @@ int verificaProcessoInterno(char *comando){
 }
 
 void processoInterno(char** comandos, Lista* listaProcessos){
-    imprimeLista(listaProcessos);
-
-    //Armageddon
     if(strcmp(comandos[0], "armageddon") == 0){
         while(1){
+
             int pid = retiraPrimeiroLista(listaProcessos);
             if(pid == -1)
                 break;
@@ -126,9 +123,8 @@ void processoInterno(char** comandos, Lista* listaProcessos){
         exit(2);
     }
     
-    //Liberamoita
     else if(strcmp(comandos[0], "liberamoita") == 0){
-        printf("SAIU DA MOITA\n");
+        printf("Liberando as moitas . . . \n");
         for(int i = 0; i < getTamanhoLista(listaProcessos); i++){
             int pid = retiraPrimeiroLista(listaProcessos);
             waitpid(pid, NULL, WNOHANG);  
@@ -136,24 +132,3 @@ void processoInterno(char** comandos, Lista* listaProcessos){
         }
     }
 }
-
-// void armageddon(char** comandos, Lista* listaProcessos){
-//     while(1){
-//         int pid = retiraPrimeiroLista(listaProcessos);
-//         if(pid == -1)
-//             break;
-        
-//         int status;
-//         waitpid(pid,&status, WNOHANG);
-//         if(!WIFEXITED(status))
-//             killpg(pid, SIGKILL);
-        
-//     }
-    
-//     printf("ARMAGEDDON\n");
-//     destroiLista(listaProcessos);
-//     liberaVetorString(comandos, 1);
-//     exit(0);
-// }
-
-
