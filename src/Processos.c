@@ -3,6 +3,7 @@
 
 
 void criaProcessoForeground(char* comando){
+    //Separa em um vetor de strings o comando e seus argumentos
     char **arrString = criaVetString(100);
     int tamArr = splitString(comando, arrString, " ");
     arrString[tamArr] = NULL;
@@ -10,15 +11,18 @@ void criaProcessoForeground(char* comando){
     int pid1 = fork();
 
     if(pid1 == 0){
+        //Executa o vetor de comando a partir da primeira string;
         int err = execvp(arrString[0], arrString);
         if(err < 0){
-            waitpid(pid1, NULL, 0);
             exit(1);
         }
-        exit(1);
-    }else{
+        exit(2);
+    }
+    else{
+        //Esperando o termino do processo filho;
         waitpid(pid1, NULL, 0);
     }
+
     liberaVetorString(arrString, tamArr);
 }
 
@@ -27,17 +31,21 @@ void criaProcessoBackground(char** listaComandos, int vetTam, Lista *listaProces
 
     if(pid1 == 0){
         destroiLista(listaProcessos);
+        
+        //cria uma session
         setsid();
 
         int pidN[5];
         int fd[vetTam-1][2];
 
+        //abre os pipes
         for(int i = 0; i < vetTam - 1; i++){
             if(pipe(fd[i]) == -1)
                 exit(1);
         }
 
         for(int i = 0; i < vetTam ; i++){
+            //Separa em um vetor de strings o comando e seus argumentos
             char **arrString = criaVetString(100);
             int tamArr = splitString(listaComandos[i], arrString, " ");
             arrString[tamArr] = NULL;
@@ -45,6 +53,7 @@ void criaProcessoBackground(char** listaComandos, int vetTam, Lista *listaProces
             pidN[i] = fork();
 
             if(pidN[i] == 0){
+                //fecha os pipes que nao serao usados
                 for(int j = 0; j < vetTam - 1 ; j++){
                     if(j != i-1)
                         close(fd[j][0]);
@@ -52,13 +61,14 @@ void criaProcessoBackground(char** listaComandos, int vetTam, Lista *listaProces
                         close(fd[j][1]);
                 }
 
-                if(i > 0){
+                //redireciona a STDIN e STDOUT para os pipes
+                if(i > 0)
                     dup2(fd[i-1][0],STDIN_FILENO);
-                }
-                if(i < vetTam-1){
+                
+                if(i < vetTam-1)
                     dup2(fd[i][1],STDOUT_FILENO);
-                }
-
+                
+                //executa o comando
                 int err = execvp(arrString[0], arrString);
                 if(err < 0){
                     liberaVetorString(arrString, tamArr);
@@ -66,7 +76,9 @@ void criaProcessoBackground(char** listaComandos, int vetTam, Lista *listaProces
                 }
                 liberaVetorString(arrString, tamArr);
 
-                close(fd[i][1]);
+                //fecha os pipes usados
+                if(i != vetTam - 1)
+                    close(fd[i][1]);
                 if(i != 0)
                     close(fd[i-1][0]);
                 
@@ -75,6 +87,7 @@ void criaProcessoBackground(char** listaComandos, int vetTam, Lista *listaProces
             liberaVetorString(arrString, tamArr);
 
         }
+        //Espera o final dos processos da session e verifica caso tenham sido terminados por sinais SIGUSR1 ou SIGUSR2
         int status;
         while(wait(&status) > 0){
             if(WIFSIGNALED(status)){
@@ -93,25 +106,29 @@ void criaProcessoBackground(char** listaComandos, int vetTam, Lista *listaProces
 }
 
 int verificaProcessoInterno(char *comando){
-    if(strcmp(comando, "armageddon") == 0){
+    //Se o comando for armageddon ou liberamoita, entao e um processo interno
+    if(strcmp(comando, "armageddon") == 0)
         return 1;
-    }
-    else if(strcmp(comando, "liberamoita") == 0){
+    
+    else if(strcmp(comando, "liberamoita") == 0)
         return 1;
-    }
+    
     return 0;
 }
 
-void processoInterno(char** comandos, Lista* listaProcessos){
-    if(strcmp(comandos[0], "armageddon") == 0){
+void processoInterno(char** listaComandos, Lista* listaProcessos){
+    //Processo armageddon:
+    if(strcmp(listaComandos[0], "armageddon") == 0){
         while(1){
-
+            //Retira processo da lista de processos
             int pid = retiraPrimeiroLista(listaProcessos);
             if(pid == -1)
                 break;
-        
+
+            //Verifica o status do processo
             int status;
             waitpid(pid,&status, WNOHANG);
+            // Caso o processo nao tenha terminado ele mata o grupo de processos desse pai
             if(!WIFEXITED(status))
                 killpg(pid, SIGKILL);
         
@@ -119,15 +136,18 @@ void processoInterno(char** comandos, Lista* listaProcessos){
     
         printf("ARMAGEDDON\n");
         destroiLista(listaProcessos);
-        liberaVetorString(comandos, 1);
+        liberaVetorString(listaComandos, 1);
         exit(2);
     }
     
-    else if(strcmp(comandos[0], "liberamoita") == 0){
+    //Processo liberamoita:
+    else if(strcmp(listaComandos[0], "liberamoita") == 0){
         printf("Liberando as moitas . . . \n");
+        //Percorre todos processos na lista de processos dando waitpid, caso tenha um zumbi a funcao ira termina-lo
         for(int i = 0; i < getTamanhoLista(listaProcessos); i++){
             int pid = retiraPrimeiroLista(listaProcessos);
-            waitpid(pid, NULL, WNOHANG);  
+            waitpid(pid, NULL, WNOHANG); 
+            // insere o processo novamente na lista de processos 
             insereLista(listaProcessos, pid);
         }
     }

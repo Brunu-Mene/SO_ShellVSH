@@ -49,14 +49,13 @@ int getTamanhoLista(Lista *lista){
 }
 
 int retiraPrimeiroLista(Lista* lista){
-  Celula* cel_aux = lista->prim; //cel_aux sempre será a primeira celula da fila
+  Celula* cel_aux = lista->prim;
   int pid;
 
   if(cel_aux == NULL) 
     return -1;
   pid = cel_aux->pid;
 
-  //na fila, só ha 2 casos a checar: cel_aux como única célula ou primeira célula da lista
   if(cel_aux == lista->ult) 
     lista->prim = lista->ult = NULL; 
   else 
@@ -64,17 +63,6 @@ int retiraPrimeiroLista(Lista* lista){
 
   free(cel_aux); 
   return pid;
-}
-
-void imprimeLista(Lista* lista){
-  Celula* cel_aux;
-  int cont = 1;
-
-  for(cel_aux = lista->prim; cel_aux != NULL; cel_aux = cel_aux->prox){
-    printf("Meu processo tem pid igual a %d\n",cel_aux->pid);
-    printf("\n");
-    cont++;
-  }
 }
 
 void destroiLista(Lista* lista){

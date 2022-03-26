@@ -4,6 +4,7 @@ char *getEntrada(){
     char in[500];
     scanf("%[^\n]",in);
     getchar();
+    
     return strdup(in);
 }
 
@@ -36,7 +37,7 @@ char* trim(char* str) {
 }
 
 void liberaVetorString(char **vetString, int tam){
-    for(int i=0; i<tam ;i++)
+    for(int i = 0; i < tam; i++)
         free(vetString[i]);
     
     free(vetString);
