@@ -127,7 +127,7 @@ void processoInterno(char** listaComandos, Lista* listaProcessos){
 
             //Verifica o status do processo
             int status;
-            waitpid(pid,&status, WNOHANG);
+            waitpid(pid,&status,WNOHANG);
             // Caso o processo nao tenha terminado ele mata o grupo de processos desse pai
             if(!WIFEXITED(status))
                 killpg(pid, SIGKILL);
@@ -146,7 +146,7 @@ void processoInterno(char** listaComandos, Lista* listaProcessos){
         //Percorre todos processos na lista de processos dando waitpid, caso tenha um zumbi a funcao ira termina-lo
         for(int i = 0; i < getTamanhoLista(listaProcessos); i++){
             int pid = retiraPrimeiroLista(listaProcessos);
-            waitpid(pid, NULL, WNOHANG); 
+            waitpid(pid, NULL, WNOHANG);
             // insere o processo novamente na lista de processos 
             insereLista(listaProcessos, pid);
         }
